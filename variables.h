@@ -1,28 +1,64 @@
 //Ethernet MAC and IP definition
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress ip(172, 16, 33, 200);
-OneWire ds(4);
+
 /********************************************************************/
-// Pass our oneWire reference to Dallas Temperature. 
+// Hearbeat for WatchDog
+#define hbPin 2
+int hwHeartbeat = HIGH;
+timer hbTimer = timer(1000 * 3); // 3 second heartbeat
+
+void hbTimerFunc() {
+  if (hbTimer.update() == 1) {
+    if (hwHeartbeat == HIGH) {
+      digitalWrite(hbPin, LOW);
+      hwHeartbeat = LOW;
+      Serial.println( "LOW" );
+    } else {
+      digitalWrite(hbPin, HIGH);
+      hwHeartbeat = HIGH;
+      Serial.println( "HIGH" );
+    }
+    hbTimer.reset();
+  }
+}
+
+
+/********************************************************************/
+// This timer object is for scheduling device reads
+SimpleTimer timer;
+
+
+/********************************************************************/
+// Dallas Temperature. 
+OneWire ds(3);
 DallasTemperature sensors(&ds);
 
 void readDS() {
  sensors.requestTemperatures(); // Send the command to get temperature readings 
  client.publish("controller/1/temp", String(sensors.getTempCByIndex(0)).c_str());
-
 }
 
-// the timer object
-SimpleTimer timer;
 
-//Button GPIO Definitions
+/********************************************************************/
+//Button Definitions
 #define BUTTON_PIN0 0
 Bounce debouncer0 = Bounce(); 
 #define BUTTON_PIN1 1
 Bounce debouncer1 = Bounce(); 
 
+void initButton() {
+  pinMode(BUTTON_PIN0,INPUT_PULLUP);
+  debouncer0.attach(BUTTON_PIN0);
+  debouncer0.interval(200);
+
+  pinMode(BUTTON_PIN1,INPUT_PULLUP);
+  debouncer0.attach(BUTTON_PIN1);
+  debouncer0.interval(200);
+}
 
 
+/********************************************************************/
 //PIR Sensor Definitions
 int PIR10 = 10;  
 unsigned long motiontimer10;
@@ -65,11 +101,10 @@ void readPIR() {
   {
     inmotion11 = false;
   }
-
-
-//  client.publish("controller/1/pin/2/pir", String(digitalRead(PIR11)).c_str());
-//  Serial.println(digitalRead(PIR11));
 }
+
+
+/********************************************************************/
 //DHT Sensor Definitions
 DHT dht4(38, DHT11);
 DHT dht5(39, DHT11);

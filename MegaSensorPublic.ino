@@ -10,6 +10,7 @@
 #include <SimpleTimer.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include "timer.h"
 
 
 EthernetClient ethClient;
@@ -17,25 +18,15 @@ PubSubClient client(ethClient);
 
 #include "variables.h"
 #include "secrets.h"
-#include "timer.h"
 
 void initHardware() {
   // You can use Ethernet.init(pin) to configure the CS pin
-  Ethernet.init(3); 
+  Ethernet.init(53); 
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
-  pinMode(BUTTON_PIN0,INPUT_PULLUP);
-  // After setting up the button, setup the Bounce instances :
-  debouncer0.attach(BUTTON_PIN0);
-  debouncer0.interval(200);
-  pinMode(BUTTON_PIN1,INPUT_PULLUP);
-  // After setting up the button, setup the Bounce instances :
-  debouncer0.attach(BUTTON_PIN1);
-  debouncer0.interval(200);
-
   byte i;
   byte dsAddress[8];
   Serial.println( "Searching for DS18B20..." );
@@ -70,9 +61,11 @@ void initHardware() {
 
 
 void setup() {
+  pinMode(hbPin, OUTPUT);
   initHardware();
   initDHT();
   initPIR();
+  initButton();
   sensors.begin(); 
   // start the Ethernet connection:
   Ethernet.begin(mac, ip);
@@ -112,7 +105,7 @@ void setup() {
   }
 
   client.publish("controller/1", "Controller 1 is Online");
-  client.subscribe("controller/1");
+  client.subscribe("controller/1/update");
   readDHT();
   readDS();
 }
@@ -121,7 +114,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
  
   Serial.print("Message arrived in topic: ");
   Serial.println(topic);
- 
+  if ((char)payload[0] == '1'){
+    readDHT();
+    readDS();
+  }
   Serial.print("Message:");
   for (int i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
@@ -136,19 +132,17 @@ void loop() {
   timer.run();
   // Update the Bounce instance :
    debouncer0.update();
-   // Call code if Bounce fell (transition from HIGH to LOW) :
    if ( debouncer0.fell() ) {
     client.publish("controller/1/pin/0/btn", "1");
    }
    debouncer1.update();
-   // Call code if Bounce fell (transition from HIGH to LOW) :
    if ( debouncer1.fell() ) {
     client.publish("controller/1/pin/1/btn", "1");
    }
   timer.setInterval(300000,  readDHT );
-  //timer.setInterval(10000,  readPIR );
   timer.setInterval(300000,  readDS );
   readPIR();
-  client.loop();
+  hbTimerFunc();
+client.loop();
   
 }
