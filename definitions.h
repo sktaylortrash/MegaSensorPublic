@@ -1,6 +1,12 @@
-//Ethernet MAC and IP definition
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip(172, 16, 33, 200);
+// Dallas Temperature. 
+OneWire ds(3);
+DallasTemperature sensors(&ds);
+
+void readDS() {
+ sensors.requestTemperatures(); // Send the command to get temperature readings 
+ client.publish("controller/1/temp", String(sensors.getTempCByIndex(0)).c_str());
+}
+
 
 /********************************************************************/
 // Hearbeat for WatchDog
@@ -23,21 +29,9 @@ void hbTimerFunc() {
   }
 }
 
-
 /********************************************************************/
 // This timer object is for scheduling device reads
 SimpleTimer timer;
-
-
-/********************************************************************/
-// Dallas Temperature. 
-OneWire ds(3);
-DallasTemperature sensors(&ds);
-
-void readDS() {
- sensors.requestTemperatures(); // Send the command to get temperature readings 
- client.publish("controller/1/temp", String(sensors.getTempCByIndex(0)).c_str());
-}
 
 
 /********************************************************************/
@@ -159,4 +153,43 @@ void readDHT() {
   dht7_humi = dht7.readHumidity();
     client.publish("controller/1/pin/29/temp", String(dht7_temp).c_str());
     client.publish("controller/1/pin/29/humi", String(dht7_humi).c_str());
+}
+
+
+/********************************************************************/
+//Ethernet MAC and IP definition
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+IPAddress ip(172, 16, 33, 200);
+
+void getMAC() {
+  byte i;
+  byte dsAddress[8];
+  Serial.println( "Searching for DS18B20..." );
+  ds.reset_search();  // Start the search with the first device
+  if( !ds.search(dsAddress) )
+  {
+    Serial.println( "none found. Using default MAC address." );
+  } else {
+    Serial.println( "success. Setting MAC address:" );
+    Serial.print( " DS18B20 ROM  =" );
+    for( i = 0; i < 8; i++)
+    {
+      Serial.write(' ');
+      Serial.print( dsAddress[i], HEX );
+    }
+    Serial.println();
+    // Offset array to skip DS18B20 family code, and skip mac[0]
+    mac[1] = dsAddress[3];
+    mac[2] = dsAddress[4];
+    mac[3] = dsAddress[5];
+    mac[4] = dsAddress[6];
+    mac[5] = dsAddress[7];
+  }    
+  Serial.print( " Ethernet MAC =" );
+  for( i = 0; i < 6; i++ )
+  {
+    Serial.write( ' ' );
+    Serial.print( mac[i], HEX );
+  }
+  Serial.println();
 }
