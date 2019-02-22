@@ -16,7 +16,7 @@
 EthernetClient ethClient;
 PubSubClient client(ethClient);
 
-#include "variables.h"
+#include "definitions.h"
 #include "secrets.h"
 
 void initHardware() {
@@ -131,14 +131,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void loop() {
   timer.run();
   // Update the Bounce instance :
-   debouncer0.update();
-   if ( debouncer0.fell() ) {
-    client.publish("controller/1/pin/0/btn", "1");
-   }
-   debouncer1.update();
-   if ( debouncer1.fell() ) {
-    client.publish("controller/1/pin/1/btn", "1");
-   }
+  checkButton();
   timer.setInterval(300000,  readDHT );
   timer.setInterval(300000,  readDS );
   readPIR();
