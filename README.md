@@ -14,6 +14,8 @@ https://www.milesburton.com/Dallas_Temperature_Control_Library
 
 https://github.com/adafruit/DHT-sensor-library
 
+https://github.com/sktaylortrash/HeartBeat
+
 Dependant Projects
 
 https://github.com/sktaylortrash/atTiny85-Watchdog
