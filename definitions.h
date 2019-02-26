@@ -72,6 +72,10 @@ int PIR11 = 11;
 unsigned long motiontimer11;
 boolean inmotion11 = false; 
 
+int PIR12 = 12;  
+unsigned long motiontimer12;
+boolean inmotion12 = false; 
+
 unsigned long motionDelay = 5000; // Motion Delay Timer
 
 void initPIR() {
@@ -79,6 +83,8 @@ void initPIR() {
   digitalWrite(PIR10,LOW);
   pinMode(PIR11,INPUT);
   digitalWrite(PIR11,LOW);
+  pinMode(PIR12,INPUT);
+  digitalWrite(PIR12,LOW);
 }
 
 void readPIR() {
@@ -105,12 +111,24 @@ void readPIR() {
   {
     inmotion11 = false;
   }
+
+  if (digitalRead(PIR12) == HIGH && !inmotion12)
+  {
+    client.publish("controller/1/pin/12/pir", String(digitalRead(PIR11)).c_str());
+    Serial.println("Motion12 Detected");
+    motiontimer12 = millis();
+    inmotion12 = true;
+  } 
+  else if (millis() - motiontimer12 >= motionDelay) 
+  {
+    inmotion12 = false;
+  }
 }
 
 
 /********************************************************************/
 //DHT Sensor Definitions
-DHT dht4(38, DHT11);
+DHT dht4(38, DHT22);
 DHT dht5(39, DHT11);
 DHT dht6(40, DHT11);
 DHT dht7(41, DHT11);
