@@ -10,7 +10,7 @@
 #include <SimpleTimer.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include "timer.h"
+#include <HeartBeat.h>
 
 
 EthernetClient ethClient;

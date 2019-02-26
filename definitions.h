@@ -12,7 +12,7 @@ void readDS() {
 // Hearbeat for WatchDog
 #define hbPin 2
 int hwHeartbeat = HIGH;
-timer hbTimer = timer(1000 * 3); // 3 second heartbeat
+HeartBeat hbTimer = HeartBeat(1000 * 3); // 3 second heartbeat
 
 void hbTimerFunc() {
   if (hbTimer.update() == 1) {
