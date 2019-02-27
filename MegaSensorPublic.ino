@@ -16,6 +16,9 @@
 EthernetClient ethClient;
 PubSubClient client(ethClient);
 
+#define DEBUGLEVEL 1
+#include <DebugUtils.h>
+
 #include "definitions.h"
 #include "secrets.h"
 
@@ -27,7 +30,9 @@ void initHardware() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
- getMAC();
+  #ifdef UseDS18B20
+   getMAC();
+  #endif
 }
 
 
@@ -53,8 +58,8 @@ void setup() {
   }
 
   // start the controller
-  Serial.print("Controller 1 is online at ");
-  Serial.println(Ethernet.localIP());
+  DEBUGPRINT1("Controller 1 is online at ");
+  DEBUGPRINTLN1(Ethernet.localIP());
   delay(2000);
   client.setServer(mqttServer, mqttPort);
   client.setCallback(callback);
@@ -83,19 +88,19 @@ void setup() {
 
 void callback(char* topic, byte* payload, unsigned int length) {
  
-  Serial.print("Message arrived in topic: ");
-  Serial.println(topic);
+  DEBUGPRINT2("Message arrived in topic: ");
+  DEBUGPRINTLN2(topic);
   if ((char)payload[0] == '1'){
     readDHT();
     readDS();
   }
-  Serial.print("Message:");
+  DEBUGPRINT2("Message:");
   for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
+    DEBUGPRINTLN2((char)payload[i]);
   }
  
-  Serial.println();
-  Serial.println("-----------------------");
+  DEBUGPRINTLN2();
+  DEBUGPRINTLN2("-----------------------");
  
 }
 

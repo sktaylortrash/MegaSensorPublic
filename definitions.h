@@ -19,11 +19,11 @@ void hbTimerFunc() {
     if (hwHeartbeat == HIGH) {
       digitalWrite(hbPin, LOW);
       hwHeartbeat = LOW;
-      Serial.println( "LOW" );
+      DEBUGPRINTLN3( "LOW" );
     } else {
       digitalWrite(hbPin, HIGH);
       hwHeartbeat = HIGH;
-      Serial.println( "HIGH" );
+      DEBUGPRINTLN3( "HIGH" );
     }
     hbTimer.reset();
   }
@@ -91,7 +91,7 @@ void readPIR() {
   if (digitalRead(PIR10) == HIGH && !inmotion10)
   {
     client.publish("controller/1/pin/10/pir", String(digitalRead(PIR10)).c_str());
-    Serial.println("Motion10 Detected");
+    DEBUGPRINTLN3("Motion10 Detected");
     motiontimer10 = millis();
     inmotion10 = true;
   } 
@@ -103,7 +103,7 @@ void readPIR() {
   if (digitalRead(PIR11) == HIGH && !inmotion11)
   {
     client.publish("controller/1/pin/11/pir", String(digitalRead(PIR11)).c_str());
-    Serial.println("Motion11 Detected");
+    DEBUGPRINTLN3("Motion11 Detected");
     motiontimer11 = millis();
     inmotion11 = true;
   } 
@@ -115,7 +115,7 @@ void readPIR() {
   if (digitalRead(PIR12) == HIGH && !inmotion12)
   {
     client.publish("controller/1/pin/12/pir", String(digitalRead(PIR11)).c_str());
-    Serial.println("Motion12 Detected");
+    DEBUGPRINTLN3("Motion12 Detected");
     motiontimer12 = millis();
     inmotion12 = true;
   } 
@@ -179,6 +179,8 @@ void readDHT() {
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress ip(172, 16, 33, 200);
 
+#define UseDS18B20 //Determines whether the MAC address should be set by the DS18B20 internal temperature sensor. Comment out to disable
+
 void getMAC() {
   byte i;
   byte dsAddress[8];
@@ -189,11 +191,11 @@ void getMAC() {
     Serial.println( "none found. Using default MAC address." );
   } else {
     Serial.println( "success. Setting MAC address:" );
-    Serial.print( " DS18B20 ROM  =" );
+    DEBUGPRINT2( " DS18B20 ROM  =" );
     for( i = 0; i < 8; i++)
     {
-      Serial.write(' ');
-      Serial.print( dsAddress[i], HEX );
+      DEBUGWRITE2(' ');
+      DEBUGPRINTHEX2( dsAddress[i] );
     }
     Serial.println();
     // Offset array to skip DS18B20 family code, and skip mac[0]
@@ -203,11 +205,11 @@ void getMAC() {
     mac[4] = dsAddress[6];
     mac[5] = dsAddress[7];
   }    
-  Serial.print( " Ethernet MAC =" );
+  DEBUGPRINT2( " Ethernet MAC =" );
   for( i = 0; i < 6; i++ )
   {
-    Serial.write( ' ' );
-    Serial.print( mac[i], HEX );
+    DEBUGWRITE2( ' ' );
+    DEBUGPRINTHEX2( mac[i] );
   }
   Serial.println();
 }
