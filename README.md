@@ -16,6 +16,8 @@ https://github.com/adafruit/DHT-sensor-library
 
 https://github.com/sktaylortrash/HeartBeat
 
+https://github.com/sktaylortrash/Pre-Compiler-Directives 
+
 Dependant Projects
 
 https://github.com/sktaylortrash/atTiny85-Watchdog
